@@ -1,3 +1,12 @@
-uploads/
-server/.env
+# Dossiers générés / locaux
 node_modules/
+uploads/
+
+# Backend / fichiers sensibles
+server/
+public_samples/
+admin-local.html
+
+# Variables d'environnement (secrets)
+.env
+server/.env
