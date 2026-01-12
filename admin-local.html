@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin local – Galerie (sans installation)</title>
+  <style>
+    :root{ --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e5e7eb; --accent:#e11d2e; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:#0b1020;color:var(--text)}
+    header{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+    h1{margin:.2rem 0 0;font-size:1.25rem}
+    main{max-width:980px;margin:20px auto;padding:0 16px 80px}
+    .card{background:linear-gradient(180deg,#0f172a,#0c1326); border:1px solid rgba(255,255,255,.09); border-radius:14px; padding:16px; box-shadow: 0 10px 30px rgba(0,0,0,.25)}
+    label{display:block;margin:8px 0 6px;color:#cbd5e1}
+    input[type=text]{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #1f2937;background:#0b1222;color:#e5e7eb}
+    .row{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+    .drop{margin-top:8px;border:2px dashed #334155;border-radius:12px;padding:24px;text-align:center;background:#0b1222;color:#94a3b8;cursor:pointer}
+    .drop.drag{background:#0e1730;border-color:#64748b}
+    button{background:#e11d2e;color:white;border:none;border-radius:10px;padding:12px 16px;cursor:pointer;font-weight:600}
+    .muted{color:#94a3b8;font-size:.95rem}
+    .bar{height:10px;background:#0b1222;border-radius:999px;overflow:hidden;margin-top:10px;border:1px solid #1f2937}
+    .bar>span{display:block;height:100%;width:0%;background:#22c55e}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    .mini{border:1px solid #1f2937;border-radius:12px;overflow:hidden;background:#0b1222}
+    .mini img{width:100%;display:block}
+    .mini .meta{padding:10px 12px;color:#94a3b8;font-size:.9rem;display:flex;justify-content:space-between}
+    .hint{background:#0b1222;border:1px dashed #334155;border-radius:12px;padding:10px 12px;color:#94a3b8}
+    .ok{color:#22c55e} .err{color:#f43f5e}
+    small{opacity:.85}
+    @media (max-width:760px){ .row{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Admin local – Galerie (sans installation)</h1>
+    <p class="muted">Fonctionne sur Chrome/Edge en <b>localhost</b>. Écrit les fichiers dans votre projet via le navigateur.</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>1) Choisir le dossier <code>/uploads</code> de votre projet</h2>
+      <p class="muted">Cliquez ci-dessous et sélectionnez le dossier <code>uploads</code> à la racine de votre site.</p>
+      <button id="pick">Choisir le dossier uploads</button>
+      <div id="pickStatus" class="muted" style="margin-top:8px"></div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>2) Créer / compléter un album</h2>
+      <div class="row">
+        <div>
+          <label>Nom de l’album</label>
+          <input id="albumName" type="text" placeholder="Ex: Championnat 2025">
+        </div>
+        <div>
+          <label>Slug (URL)</label>
+          <input id="albumSlug" type="text" placeholder="auto-généré si vide">
+        </div>
+      </div>
+
+      <div id="drop" class="drop" style="margin-top:12px">
+        <input id="filePick" type="file" accept="image/*" multiple style="display:none">
+        <p>Déposez des images ici<br><small>ou cliquez pour choisir</small></p>
+      </div>
+
+      <div class="bar" style="margin-top:12px"><span id="bar"></span></div>
+      <div id="status" class="muted" style="margin-top:8px"></div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>3) Albums détectés</h2>
+      <p class="muted">Basé sur <code>uploads/_albums.json</code>. Les nouveaux envois mettent à jour ce fichier automatiquement.</p>
+      <ul id="albums" class="grid"></ul>
+    </section>
+
+    <section class="hint" style="margin-top:16px">
+      <b>Notes</b>
+      <ul>
+        <li>Les images sont redimensionnées côté navigateur : <b>1600px</b> (grande) et <b>420px</b> (vignette), en <code>.jpg</code>.</li>
+        <li>Les manifestes générés : <code>uploads/_albums.json</code> et <code>uploads/&lt;slug&gt;/index.json</code>.</li>
+        <li>Votre <b>galerie.html</b> et <b>album.html</b> lisent ces JSON.</li>
+      </ul>
+    </section>
+  </main>
+
+<script>
+  let rootDirHandle = null;
+
+  function slugify(str){
+    return (str||'album')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^a-zA-Z0-9]+/g,'-')
+      .replace(/^-+|-+$/g,'')
+      .toLowerCase() || 'album';
+  }
+
+
+  async function chooseUploadsDir(){
+    if(!window.showDirectoryPicker){
+      alert("Votre navigateur ne supporte pas la sélection de dossiers. Utilisez Chrome/Edge sur ordinateur.");
+      return;
+    }
+    const handle = await window.showDirectoryPicker({ mode:'readwrite' });
+
+    // ✅ Si l’utilisateur choisit déjà le dossier “uploads”, on l’utilise tel quel
+    if (handle.name && handle.name.toLowerCase() === 'uploads') {
+      rootDirHandle = handle;
+    } else {
+      // ✅ Sinon, on crée/ouvre un sous-dossier “uploads” DANS le dossier choisi
+      rootDirHandle = await handle.getDirectoryHandle('uploads', { create:true });
+    }
+
+    document.getElementById('pickStatus').innerHTML = rootDirHandle
+      ? "<span class='ok'>OK</span> — Dossier prêt."
+      : "<span class='err'>Erreur</span> — Réessayez.";
+
+    await refreshAlbums();
+  }
+
+  function updateBar(p){ document.getElementById('bar').style.width = (p||0)+'%'; }
+
+  function readFile(file){
+    return new Promise((resolve,reject)=>{
+      const fr = new FileReader();
+      fr.onerror = reject;
+      fr.onload = () => resolve(fr.result);
+      fr.readAsDataURL(file);
+    });
+  }
+  function loadImage(url){ return new Promise((resolve,reject)=>{ const img=new Image(); img.onload=()=>resolve(img); img.onerror=reject; img.src=url; }); }
+
+  async function resizeToJpeg(file, maxW, maxH, quality=0.82){
+    const dataUrl = await readFile(file);
+    const img = await loadImage(dataUrl);
+    const ratio = Math.min(maxW/img.width, maxH/img.height, 1);
+    const w = Math.round(img.width * ratio);
+    const h = Math.round(img.height * ratio);
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, w, h);
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
+    const arrayBuf = await blob.arrayBuffer();
+    return new Uint8Array(arrayBuf);
+  }
+
+  async function ensureDir(parent, name){
+    return await parent.getDirectoryHandle(name, { create:true });
+  }
+  async function writeFile(dirHandle, filename, data){
+    const fileHandle = await dirHandle.getFileHandle(filename, { create:true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(data);
+    await writable.close();
+  }
+  async function readJSON(dirHandle, filename, def){
+    try{
+      const fh = await dirHandle.getFileHandle(filename);
+      const f = await fh.getFile();
+      const txt = await f.text();
+      return JSON.parse(txt);
+    }catch(e){ return def; }
+  }
+
+  async function processUpload(fileList){
+    if(!rootDirHandle){ alert("Choisissez d’abord le dossier uploads."); return; }
+    const albumName = document.getElementById('albumName').value.trim() || 'Album';
+    const albumSlug = (document.getElementById('albumSlug').value.trim() || slugify(albumName));
+    const albumDir = await ensureDir(rootDirHandle, albumSlug);
+    const thumbsDir = await ensureDir(albumDir, '_thumbs');
+
+    const manifest = await readJSON(albumDir, 'index.json', { slug: albumSlug, title: albumName, images: [] });
+    const existing = new Set(manifest.images.map(x => x.file));
+    const files = Array.from(fileList);
+    let done = 0;
+
+    for (const f of files){
+      const base = f.name.replace(/\.[^.]+$/, '');
+      const fullBytes = await resizeToJpeg(f, 1600, 1600, 0.82);
+      const thBytes   = await resizeToJpeg(f, 420, 420, 0.76);
+      await writeFile(albumDir, base+'.jpg', fullBytes);
+      await writeFile(thumbsDir, base+'.jpg', thBytes);
+      const fullPath = 'uploads/'+albumSlug+'/'+base+'.jpg';
+      const thPath   = 'uploads/'+albumSlug+'/_thumbs/'+base+'.jpg';
+      if(!existing.has(fullPath)){
+        manifest.images.push({ file: fullPath, thumb: thPath });
+      }
+      done++; updateBar(Math.round(done*100/files.length));
+    }
+
+    // Trie par nom
+    manifest.images.sort((a,b)=> a.file.localeCompare(b.file));
+    await writeFile(albumDir, 'index.json', new TextEncoder().encode(JSON.stringify(manifest, null, 2)));
+
+    // Met à jour /uploads/_albums.json
+    const albums = await readJSON(rootDirHandle, '_albums.json', []);
+    const cover = manifest.images[0]?.thumb || null;
+    const item = { slug: albumSlug, title: albumName, count: manifest.images.length, cover };
+    const i = albums.findIndex(a => a.slug === albumSlug);
+    if(i>=0) albums[i]=item; else albums.push(item);
+    albums.sort((a,b)=> a.title.localeCompare(b.title));
+    await writeFile(rootDirHandle, '_albums.json', new TextEncoder().encode(JSON.stringify(albums, null, 2)));
+
+    document.getElementById('status').innerHTML = "<span class='ok'>OK</span> — Import terminé pour « "+albumName+" ».";
+    await refreshAlbums();
+    setTimeout(()=>updateBar(0), 600);
+  }
+
+  async function refreshAlbums(){
+    if(!rootDirHandle){ document.getElementById('albums').innerHTML = ''; return; }
+    const albums = await readJSON(rootDirHandle, '_albums.json', []);
+    const ul = document.getElementById('albums');
+    ul.innerHTML = albums.map(a => `
+      <li class="mini">
+        ${a.cover ? `<img src="${a.cover}" alt="${a.title}">` : ''}
+        <div class="meta"><b>${a.title}</b><span>${a.count}</span></div>
+      </li>
+    `).join('');
+  }
+
+  // UI
+  document.getElementById('pick').addEventListener('click', chooseUploadsDir);
+  const drop = document.getElementById('drop');
+  const filePick = document.getElementById('filePick');
+  drop.addEventListener('click', ()=>filePick.click());
+  drop.addEventListener('dragenter', e=>{ e.preventDefault(); drop.classList.add('drag'); });
+  drop.addEventListener('dragover',  e=>{ e.preventDefault(); });
+  drop.addEventListener('dragleave', e=>{ e.preventDefault(); drop.classList.remove('drag'); });
+  drop.addEventListener('drop', async (e)=>{ e.preventDefault(); drop.classList.remove('drag'); if(e.dataTransfer.files.length) await processUpload(e.dataTransfer.files); });
+  filePick.addEventListener('change', async ()=>{ if(filePick.files.length) await processUpload(filePick.files); });
+</script>
+</body>
+</html>

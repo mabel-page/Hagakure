@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Album – Hagakure KC</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div data-include="partials/header.html"></div>
+  <main id="main">
+    <h1 id="title">Album</h1>
+    <section id="pics" class="gallery" aria-live="polite"></section>
+  </main>
+  <div data-include="partials/footer.html"></div>
+  <script type="module" src="assets/js/includes.js"></script>
+  <div id="lb" class="lb-backdrop" aria-hidden="true">
+    <button class="lb-close" aria-label="Fermer">×</button>
+    <button class="lb-prev" aria-label="Précédent">‹</button>
+    <img class="lb-img" alt="">
+    <button class="lb-next" aria-label="Suivant">›</button>
+  </div>
+  <script>
+  function getParam(name){const u=new URL(location.href);return u.searchParams.get(name);}
+  const slug=getParam('slug');const titleEl=document.getElementById('title');const pics=document.getElementById('pics');
+  (async function(){
+    if(!slug){ pics.innerHTML = '<article class="card">Album introuvable.</article>'; return; }
+    try{
+      const r = await fetch('/api/albums/'+encodeURIComponent(slug));
+      if(!r.ok){ throw new Error('404'); }
+      const data = await r.json();
+      titleEl.textContent = data.title;
+      pics.innerHTML = data.images.map((img,i)=>`
+        <a href="${img.file}" class="lb-link" data-index="${i}">
+          <img src="${img.thumb}" alt="${data.title} ${i+1}" loading="lazy">
+        </a>
+      `).join('');
+    }catch(e){
+      pics.innerHTML = '<article class="card">Erreur de chargement.</article>';
+    }
+  })();
+  (function(){
+    const lb=document.getElementById('lb');const img=lb.querySelector('.lb-img');
+    const close=lb.querySelector('.lb-close');const prev=lb.querySelector('.lb-prev');const next=lb.querySelector('.lb-next');
+    let links=[], index=0;
+    function open(i){links=Array.from(document.querySelectorAll('.lb-link'));
+      index=Math.max(0,Math.min(i,links.length-1));
+      const href=links[index].getAttribute('href'); img.src=href; lb.classList.add('open'); lb.setAttribute('aria-hidden','false'); }
+    function hide(){ lb.classList.remove('open'); lb.setAttribute('aria-hidden','true'); img.removeAttribute('src'); }
+    function go(d){ open(index+d); }
+    document.addEventListener('click',(e)=>{const a=e.target.closest('.lb-link'); if(!a) return; e.preventDefault(); open(parseInt(a.dataset.index,10)||0);});
+    close.addEventListener('click',hide); prev.addEventListener('click',()=>go(-1)); next.addEventListener('click',()=>go(1));
+    document.addEventListener('keydown',(e)=>{ if(lb.classList.contains('open')){ if(e.key==='Escape') hide(); if(e.key==='ArrowLeft') go(-1); if(e.key==='ArrowRight') go(1);} });
+    lb.addEventListener('click',(e)=>{ if(e.target===lb) hide(); });
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!doctype html><meta charset="utf-8">
+<title>Admin Albums</title>
+<style>
+body{font-family:system-ui;margin:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.card{border:1px solid #ddd;border-radius:10px;padding:10px}
+.thumb{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;border:1px solid #eee}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+button{padding:6px 10px;border-radius:8px;border:1px solid #ccc;cursor:pointer}
+small{color:#666}
+</style>
+<h1>Albums</h1>
+<p><a href="login.php?logout=1">Se déconnecter</a></p>
+<p><a href="/admin/index.html">⬅ Retour Upload</a></p>
+<div id="albums" class="grid"></div>
+<hr>
+<h2 id="title">Album</h2>
+<div class="row">
+  <button id="btnRename">Renommer</button>
+  <label><input type="file" id="picker" multiple accept="image/*"> Ajouter des photos</label>
+</div>
+<div id="images" class="grid"></div>
+<script>
+const $albums=document.getElementById('albums'), $images=document.getElementById('images'), $title=document.getElementById('title');
+let current=null;
+
+async function loadAlbums(){
+  const r=await fetch('/api/albums'); const list=await r.json();
+  $albums.innerHTML=list.map(a=>`
+    <div class="card">
+      <img class="thumb" src="${a.cover||''}" alt="">
+      <h3>${a.title}</h3>
+      <small>${a.slug} — ${a.count} photo(s)</small><br>
+      <button data-open="${a.slug}">Ouvrir</button>
+    </div>
+  `).join('');
+  $albums.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openAlbum(b.dataset.open));
+}
+async function openAlbum(slug){
+  const r=await fetch('/api/albums/'+slug); if(!r.ok) return alert('Album introuvable');
+  const data=await r.json(); current=data.slug; $title.textContent='Album : '+data.title+' ('+data.slug+')';
+  $images.innerHTML=data.images.map(i=>`
+    <div class="card">
+      <img class="thumb" src="${i.thumb}" alt="">
+      <div class="row">
+        <a href="${i.file}" target="_blank">Voir</a>
+        <button data-del="${i.file.split('/').pop()}">Supprimer</button>
+      </div>
+    </div>
+  `).join('');
+  $images.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>delImage(b.dataset.del));
+}
+async function delImage(file){
+  if(!current) return; if(!confirm('Supprimer '+file+' ?')) return;
+  const r=await fetch('/api/albums/'+current+'/images/'+encodeURIComponent(file),{method:'DELETE'});
+  if(r.ok) openAlbum(current); else alert('Erreur suppression');
+}
+document.getElementById('btnRename').onclick=async ()=>{
+  if(!current) return alert('Ouvre un album d’abord.');
+  const ns=prompt('Nouveau slug (ex: championnat-2025) :', current); if(!ns||ns===current) return;
+  const r=await fetch('/api/albums/'+current+'/rename',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({newSlug:ns})});
+  if(r.ok){ await loadAlbums(); await openAlbum(ns); } else { const e=await r.json().catch(()=>({})); alert('Erreur: '+(e.error||r.status)); }
+};
+document.getElementById('picker').onchange=async (e)=>{
+  if(!current) return alert('Ouvre un album d’abord.');
+  const files=[...e.target.files]; if(!files.length) return;
+  const fd=new FormData(); fd.append('albumSlug', current);
+  files.forEach(f=>fd.append('files', f));
+  const r=await fetch('/api/upload',{method:'POST',body:fd});
+  if(r.ok) openAlbum(current); else alert('Upload échoué');
+};
+loadAlbums();
+</script>

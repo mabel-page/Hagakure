@@ -1,0 +1,1048 @@
+:root {
+  --bg: #ffffff;
+  --bg-elev: #f6f7f9;
+  --card: #f7f7f9;
+  --text: #111213;
+  --muted: #5c6670;
+  --accent: #e11d2e;
+  /* rouge karaté */
+  --accent-2: #b45309;
+  /* doré discret */
+  --radius: 14px;
+  --container: min(1100px, 92vw);
+  --border: #e6e8eb;
+  --shadow: 0 6px 18px rgba(0, 0, 0, .06);
+  --paper-bg: #fbf7ef;
+  --paper-border: #eadfcb;
+}
+
+* {
+  box-sizing: border-box
+}
+
+html,
+body {
+  height: 100%
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+  text-decoration: none
+}
+
+img {
+  max-width: 100%;
+  display: block;
+  height: auto
+}
+
+/* Header / Nav with dropdowns */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: saturate(160%) blur(8px);
+  background: color-mix(in srgb, var(--bg) 84%, transparent);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav {
+  max-width: var(--container);
+  margin-inline: auto;
+  padding: 10px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  position: relative
+}
+
+.nav__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  letter-spacing: .2px
+}
+
+.nav__brand img {
+  width: 32px;
+  height: 32px
+}
+
+.nav__spacer {
+  flex: 1
+}
+
+.nav__toggle {
+  display: none;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: var(--shadow)
+}
+
+.nav__links {
+  display: flex;
+  gap: 6px;
+  flex-wrap: nowrap
+}
+
+.nav__item {
+  position: relative;
+  list-style: none
+}
+
+.nav__top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--muted);
+}
+
+.nav__top:hover,
+.nav__top:focus {
+  /* background:rgba(225,29,46,.09);  */
+  color: var(--text)
+}
+
+.nav__expander {
+  display: none
+}
+
+.nav__submenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 240px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  /* padding: 8px; */
+  display: none;
+}
+
+.nav__submenu a {
+  display: flex;
+  padding: 10px 10px;
+  border-radius: 8px;
+  color: var(--muted);
+}
+
+.nav__submenu a:hover {
+  background: rgba(225, 29, 46, .09);
+  color: var(--text)
+}
+
+/* Hover & focus open */
+.nav__item:hover>.nav__submenu,
+.nav__item:focus-within>.nav__submenu {
+  display: block
+}
+
+/* Active indicator */
+.nav__link.active .nav__top {
+  /* background:rgba(225,29,46,.12); */
+  color: var(--text)
+}
+
+/* Mobile menu */
+@media (max-width: 900px) {
+  .nav__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px
+  }
+
+  .nav__links {
+    display: none;
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    top: 56px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: var(--shadow);
+  }
+
+  .nav__links.open {
+    display: flex
+  }
+
+  .nav__item {
+    width: 100%
+  }
+
+  .nav__top {
+    justify-content: space-between;
+    width: 100%
+  }
+
+  .nav__expander {
+    display: inline-flex;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 14px;
+    cursor: pointer
+  }
+
+  .nav__submenu {
+    position: static;
+    display: none;
+    border: none;
+    box-shadow: none;
+    padding: 0 0 8px 0
+  }
+
+  .nav__item.open>.nav__submenu {
+    display: block
+  }
+}
+
+/* Layout */
+main {
+  max-width: var(--container);
+  margin: 24px auto;
+  padding: 0 16px 84px;
+  position: relative;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent-2);
+  text-transform: uppercase;
+  letter-spacing: .18em;
+  font-size: clamp(.72rem, .65rem + .4vw, .85rem)
+}
+
+h1 {
+  margin: 10px 0 16px;
+  font-size: clamp(1.6rem, 1.1rem + 2.2vw, 2.6rem);
+}
+
+h2 {
+  margin: 24px 0 12px;
+  font-size: clamp(1.2rem, 1rem + 1.2vw, 1.8rem)
+}
+
+p {
+  line-height: 1.75;
+  color: var(--muted);
+  font-size: clamp(.98rem, .94rem + .3vw, 1.05rem)
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow)
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(225, 29, 46, .09);
+  color: var(--text);
+  font-size: .85rem
+}
+
+/* Grids */
+.grid {
+  display: grid;
+  gap: 24px
+}
+
+.two-col {
+  grid-template-columns: 1.15fr 1fr;
+  align-items: start
+}
+
+@media (max-width: 900px) {
+  .two-col {
+    grid-template-columns: 1fr
+  }
+}
+
+/* Tables */
+.table-wrap {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card)
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 520px
+}
+
+th,
+td {
+  padding: 12px 14px;
+  border-bottom: 1px dashed var(--border);
+  text-align: left;
+  white-space: nowrap
+}
+
+th {
+  color: var(--text);
+  background: #fff
+}
+
+td {
+  color: var(--muted)
+}
+
+/* Buttons / Forms */
+form {
+  display: grid;
+  gap: 12px;
+  max-width: 680px
+}
+
+input,
+textarea {
+  width: 100%;
+  background: #fff;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font: inherit;
+  box-shadow: inset 0 1px 0 #fff
+}
+
+textarea {
+  min-height: 140px
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  /* background: var(--accent); */
+  background-color: #b45309;
+  border: none;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+/* Bouton "slim" pour petits appels à l'action */
+/* bouton fin + couleur club */
+.btn--slim{
+  padding: 6px 10px;
+  font-size: .9rem;
+  border-radius: 8px;
+  line-height: 1.1;
+  background: var(--accent-2);   /* = #b45309 */
+  color: #fff;
+  border: 1px solid color-mix(in srgb, var(--accent-2) 85%, #000 15%);
+  transition: background .2s, transform .15s, box-shadow .2s;
+}
+.btn--slim:hover{
+  background: color-mix(in srgb, var(--accent-2) 88%, #000 12%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0,0,0,.12);
+}
+.btn--slim:active{
+  transform: none;
+  background: color-mix(in srgb, var(--accent-2) 82%, #000 18%);
+}
+.btn--slim:focus-visible{
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-2) 35%, #fff 65%);
+}
+@media (pointer: coarse){
+  .btn--slim{ padding: 8px 12px; } /* un peu plus de tap target sur mobile */
+}
+
+
+
+/* Footer with sitemap */
+footer {
+  border-top: 1px solid var(--border);
+  background: var(--bg-elev)
+}
+
+.footer {
+  max-width: var(--container);
+  margin-inline: auto;
+  padding: 28px 16px;
+  display: grid;
+  gap: 18px;
+  color: var(--muted)
+}
+
+.footer__grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px
+}
+
+@media(max-width:900px) {
+  .footer__grid {
+    grid-template-columns: 1fr
+  }
+}
+
+.footer h3 {
+  margin: 0 0 8px;
+  color: var(--text);
+  font-size: 1rem
+}
+
+.footer a {
+  color: var(--muted)
+}
+
+.footer a:hover {
+  color: var(--text)
+}
+
+/* Lightbox */
+.lb-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .88);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 80;
+  padding: 6vw
+}
+
+.lb-backdrop.open {
+  display: flex
+}
+
+.lb-img {
+  max-width: 100%;
+  max-height: 86vh;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, .15);
+  width: auto;
+  height: auto;
+  background: #fff
+}
+
+.lb-close,
+.lb-prev,
+.lb-next {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  font: inherit;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  color: var(--text);
+  padding: 12px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: var(--shadow)
+}
+
+.lb-close {
+  top: 6%;
+  right: 5%;
+  transform: none
+}
+
+.lb-prev {
+  left: 4%
+}
+
+.lb-next {
+  right: 4%
+}
+
+@media (max-width:700px) {
+
+  .lb-prev,
+  .lb-next {
+    top: auto;
+    bottom: 5%;
+    transform: none
+  }
+
+  .lb-prev {
+    left: 8%
+  }
+
+  .lb-next {
+    right: 8%
+  }
+}
+
+/* Intro (index) */
+.intro__logo {
+  max-width: 70vw
+}
+
+/* Galleries */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.gallery img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  cursor: zoom-in;
+}
+
+/* Figures flottantes dans le texte */
+.figure {
+  max-width: clamp(220px, 30vw, 360px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  background: #fff;
+  overflow: hidden;
+}
+
+.figure img {
+  width: 100%;
+  height: auto;
+  display: block
+}
+
+.figure figcaption {
+  padding: 8px 10px;
+  font-size: .85rem;
+  color: var(--muted)
+}
+
+.figure-left {
+  float: left;
+  margin: 0 16px 12px 0
+}
+
+.figure-right {
+  float: right;
+  margin: 0 0 12px 16px
+}
+
+/* Clear des flottants à l’intérieur des cartes */
+.card::after {
+  content: "";
+  display: block;
+  clear: both
+}
+
+/* Mobile : on enlève le float et on passe en pleine largeur */
+@media (max-width: 760px) {
+
+  .figure-left,
+  .figure-right {
+    float: none;
+    margin: 10px auto 14px;
+    max-width: 100%
+  }
+}
+
+/* ==== Footer sombre, aligné sur 4 colonnes ==== */
+.site-footer {
+  background: #0e1116;
+  color: #f5f7fa;
+  border-top: none
+}
+
+.site-footer a {
+  color: #e7e9ee;
+  opacity: .9;
+  text-decoration: none
+}
+
+.site-footer a:hover,
+.site-footer a:focus {
+  opacity: 1;
+  text-decoration: underline
+}
+
+.site-footer .container {
+  max-width: var(--container);
+  margin-inline: auto;
+  padding: 32px 16px 18px
+}
+
+.footer__grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 960px) {
+  .footer__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+  }
+}
+
+@media (max-width: 520px) {
+  .footer__grid {
+    grid-template-columns: 1fr
+  }
+}
+
+.footer__col h3 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  letter-spacing: .02em;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.footer__list {
+  list-style: none;
+  padding: 0;
+  margin: 0
+}
+
+.footer__list li {
+  margin: 6px 0
+}
+
+.footer__list a {
+  display: inline-block;
+  padding: 2px 0
+}
+
+.footer__bottom {
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, .12);
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer__meta {
+  opacity: .8;
+  font-size: .92rem
+}
+
+/* ===== Albums (page Galerie) — compact 4 colonnes ===== */
+.albums {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* 4 par rangée */
+}
+
+@media (max-width: 1100px) {
+  .albums {
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+  }
+}
+
+@media (max-width: 740px) {
+  .albums {
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+  }
+}
+
+@media (max-width: 420px) {
+  .albums {
+    grid-template-columns: 1fr
+  }
+}
+
+.album-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.album-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, .08)
+}
+
+/* Vignettes plus petites et régulières */
+.album-cover {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  /* carré pour un rendu “dossier” compact */
+  object-fit: cover;
+  display: block;
+}
+
+.album-body {
+  padding: 10px 12px
+}
+
+.album-title {
+  margin: 0 0 4px;
+  font-weight: 700;
+  font-size: .98rem;
+  color: var(--text)
+}
+
+.album-meta {
+  font-size: .86rem;
+  color: var(--muted)
+}
+
+/* Plus d'espace avant chaque nouveau titre de section (sauf le tout premier) */
+.card *+h2 {
+  margin-top: clamp(28px, 3vw, 48px);
+  /* > 24px par défaut */
+}
+
+/* Empêche un <h2> de se coller à côté d'une image flottante et corrige l'ancre */
+.card h2 {
+  clear: both;
+  /* le titre repart bien sous les figures flottantes */
+  scroll-margin-top: 90px;
+  /* confortable sous le header sticky lors d'un clic sur une ancre */
+}
+
+/* Applique le papier aux cartes */
+.card {
+  position: relative;
+  background: var(--paper-bg) !important;
+  border: 1px solid var(--paper-border) !important;
+  /* ombre douce + léger relief intérieur */
+  box-shadow: var(--shadow), inset 0 1px rgba(255, 255, 255, .6);
+}
+
+/* Texture ultra légère (fibres + grain) */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    /* micro-fibres espacées */
+    radial-gradient(rgba(86, 64, 44, .07) .5px, transparent .6px) 0 0/6px 6px,
+    radial-gradient(rgba(86, 64, 44, .035) .5px, transparent .6px) 3px 2px/6px 6px,
+    /* voile clair pour adoucir */
+    linear-gradient(0deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, .3));
+  opacity: .45;
+  /* intensité de la texture */
+  mix-blend-mode: multiply;
+  /* se fond avec la carte */
+}
+
+.card {
+  border-radius: 16px;
+}
+
+/* ===== Soulignement pinceau rouge pour le MENU ===== */
+.nav__top,
+.nav__submenu a {
+  position: relative;
+  overflow: visible
+}
+
+/* Ligne pinceau (cachée par défaut) */
+.nav__top::after,
+.nav__submenu a::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  bottom: 6px;
+  /* top-level */
+  background: linear-gradient(90deg,
+      rgba(225, 29, 46, 0) 0%,
+      rgba(225, 29, 46, 1) 18%,
+      rgba(225, 29, 46, 1) 82%,
+      rgba(225, 29, 46, 0) 100%);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform .35s cubic-bezier(.2, .7, 0, 1);
+  opacity: .95;
+}
+
+/* Ajuste un peu le placement dans les sous-menus */
+.nav__submenu a::after {
+  left: 8px;
+  right: 8px;
+  bottom: 8px
+}
+
+/* Affiche la ligne au survol / focus */
+.nav__top:hover::after,
+.nav__top:focus-visible::after,
+.nav__submenu a:hover::after,
+.nav__submenu a:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* --- Persiste la ligne rouge pour l'élément actif --- */
+/* Top-level actif (tu as déjà .nav__link.active côté HTML) */
+.nav__link.active>.nav__top::after {
+  transform: scaleX(1);
+}
+
+/* Sous-menu actif : utilise soit .is-active, soit aria-current="page" */
+.nav__submenu a.is-active::after,
+.nav__submenu a[aria-current="page"]::after {
+  transform: scaleX(1);
+}
+
+/* Respecte les préférences d’accessibilité */
+@media (prefers-reduced-motion: reduce) {
+  .nav__top::after,
+  .nav__submenu a::after {
+    transition: none
+  }
+}
+
+.card{
+  position:relative;
+  background: color-mix(in srgb, var(--paper-bg) 96%, white 4%);
+  border:1px solid color-mix(in srgb, var(--paper-bg) 70%, #000 30% / 8%);
+  box-shadow: var(--shadow), inset 0 1px rgba(255,255,255,.6);
+}
+
+/* Grain + micro-fibres supplémentaires dans les cartes */
+.card::before{
+  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background:
+    /* micro-grain (points très diffus) */
+    radial-gradient(rgba(var(--paper-ink) / .06) .5px, transparent .8px) 0 0/6px 6px,
+    radial-gradient(rgba(var(--paper-ink) / .035) .5px, transparent .8px) 3px 2px/6px 6px,
+
+    /* voile d’uniformisation léger */
+    linear-gradient(0deg, rgba(255,255,255,.4), rgba(255,255,255,.25));
+  opacity: var(--paper-strength);
+  mix-blend-mode: multiply;
+}
+
+/* Option : très léger vignettage des cartes (renforce l’effet papier) */
+.card::after{
+  content:""; position:absolute; inset:-2px; border-radius:inherit; pointer-events:none;
+  background:
+    radial-gradient(120% 90% at 50% 120%,
+      rgba(0,0,0,.04), transparent 60%),
+    radial-gradient(120% 90% at 50% -20%,
+      rgba(0,0,0,.03), transparent 60%);
+  opacity:.5;
+}
+
+/* Accessibilité : réduire la texture si l’utilisateur préfère moins de mouvement/effet */
+@media (prefers-reduced-motion: reduce){
+  :root{ --paper-strength: .28; }
+}
+
+/* Chapitres avec image latérale centrée */
+.chapter{
+  display:grid;
+  gap:16px 22px;
+  align-items:center;            /* centre l'image verticalement par rapport au texte */
+  margin:28px 0;
+}
+.chapter.img-right{
+  grid-template-columns: 1fr minmax(260px, 34%);
+  grid-template-areas: "text fig";
+}
+.chapter.img-left{
+  grid-template-columns: minmax(260px, 34%) 1fr;
+  grid-template-areas: "fig text";
+}
+.chapter__text{ grid-area: text; }
+.chapter .figure{
+  grid-area: fig;
+  float:none;                    /* on neutralise le float */
+  margin:0;                      /* plus de décalage parasite */
+  max-width: clamp(240px, 34vw, 380px);
+  justify-self: center;          /* centre horizontalement la figure dans sa colonne */
+}
+
+/* Mobile : image au-dessus, texte dessous */
+@media (max-width: 760px){
+  .chapter, .chapter.img-right, .chapter.img-left{
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "fig"
+      "text";
+  }
+  .chapter .figure{ max-width:100%; }
+}
+/* Mieux entourer les listes quand une figure est flottante à côté */
+.figure{                       /* aide le wrap, bord arrondi pour le flux */
+  shape-outside: inset(0 round 12px);
+}
+.figure-left{
+  float:left;
+  margin: 0 26px 16px 0;       /* + d'air à droite de l'image */
+  shape-margin: 16px;          /* espace de sécurité dans le flux */
+}
+.figure-right{
+  float:right;
+  margin: 0 0 16px 26px;       /* + d'air à gauche de l'image */
+  shape-margin: 16px;
+}
+
+/* Gouttière supplémentaire pour les listes voisines d'une figure */
+.figure-left ~ ul, .figure-left ~ ol { margin-left: 18px; }
+.figure-right ~ ul, .figure-right ~ ol { margin-right: 18px; }
+
+/* Un peu plus d'indentation + d'espacement des items */
+.card ul, .card ol{
+  list-style-position: outside;
+  padding-left: 1.20rem;
+}
+.card li{ margin: 6px 0; }
+
+/* Sur mobile (plus de float), on remet les marges à zéro */
+@media (max-width: 760px){
+  .figure-left ~ ul, .figure-left ~ ol,
+  .figure-right ~ ul, .figure-right ~ ol{
+    margin-left: 0; margin-right: 0;
+  }
+}
+/* Matrice JKA : 2 colonnes x 2 lignes (HD fig | HD texte) puis (Miy texte | Miy fig) */
+.jka-matrix{
+  display:grid;
+  grid-template-columns: minmax(280px, 40%) 1fr;
+  grid-template-areas:
+    "hd-fig  hd-text"
+    "miy-text miy-fig";
+  gap:20px 24px;
+  align-items:center;
+  margin:26px 0 30px;
+}
+.jka-hd-fig  { grid-area: hd-fig; }
+.jka-hd-text { grid-area: hd-text; align-self:start; }
+.jka-miy-text{ grid-area: miy-text; align-self:start; }
+.jka-miy-fig { grid-area: miy-fig; }
+
+/* Figures dans la grille : pas de float, largeur raisonnable */
+.jka-matrix .figure{ float:none; margin:0; max-width: clamp(260px, 36vw, 420px); }
+
+/* Mobile : on empile proprement */
+@media (max-width: 760px){
+  .jka-matrix{
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "hd-fig"
+      "hd-text"
+      "miy-text"
+      "miy-fig";
+  }
+  .jka-matrix .figure{ max-width:100% }
+}
+/* Image portrait à l'intérieur d'une carte */
+.card__media{
+  margin: 8px 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: var(--shadow);
+
+  /* garde un cadre vertical propre (portrait) */
+  aspect-ratio: 3 / 4;          /* tu peux mettre 2/3 ou 1/1.414 (format A) */
+  display: flex;                 /* centrer l'image si elle a des bords */
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;              /* rien ne dépasse */
+}
+.card__media img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;           /* affiche entière sans couper (poster) */
+  display: block;
+}
+
+.decor{
+  position:absolute;
+  left: var(--x, 0);     /* ex: 10% */
+  top:  var(--y, 0);     /* ex: 20% */
+  width: var(--w, 110px);/* ex: 120px */
+  aspect-ratio: var(--ar, 1 / 1);   /* carré par défaut; motifs s’adaptent */
+  pointer-events:none;
+  z-index: 2;            /* au dessus le contenu */
+  opacity: var(--alpha, 0.16);
+  transform: rotate(var(--rot, 0deg));
+  /* color: var(--accent-2); */
+  background: center / contain no-repeat var(--img);
+  mix-blend-mode: multiply;            /* s’intègre au “papier” */
+}
+
+/* Variantes: Torii, Mont Fuji, Seigaiha (vagues) */
+/* stroke='currentColor' => hérite de color (donc #b45309) */
+.decor--torii{
+  --img: url("../img/decor/torii-gate.svg");
+  --ar: 1 / 1; /* ajuste si besoin */
+}
+
+.decor--flower{
+  --img: url("../img/decor/cherry_blossom.svg");
+  --ar: 1 / 1; /* ajuste si besoin */
+}
+
+.decor--shoes{
+  --img: url("../img/decor/geta_shoes.svg");
+  --ar: 1 / 1; /* ajuste si besoin */
+}
+
+/* Cacher / alléger sur mobile pour éviter d’en mettre trop */
+@media (max-width: 760px){
+  .decor{ opacity:.30 }
+  .decor--mobile-hide{ display:none }
+}
+
+/* Empêcher le scroll quand la lightbox est ouverte */
+body.lb-open { overflow: hidden; }
+
+/* Spinner quand l'image HD charge */
+.lb-backdrop.loading::after{
+  content:"";
+  position:fixed; inset:auto;
+  top:50%; left:50%; transform:translate(-50%,-50%);
+  width:44px; height:44px; border-radius:50%;
+  border:3px solid rgba(255,255,255,.45);
+  border-top-color: rgba(255,255,255,.95);
+  animation: lbspin 1s linear infinite;
+}
+@keyframes lbspin{ to{ transform:translate(-50%,-50%) rotate(360deg); } }

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Album – Hagakure KC</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <div data-include="partials/header.html"></div>
+
+  <main id="main">
+    <h1 id="title">Album</h1>
+    <section id="pics" class="gallery" aria-live="polite"></section>
+  </main>
+
+  <div data-include="partials/footer.html"></div>
+  <script type="module" src="assets/js/includes.js"></script>
+
+  <!-- Lightbox (réutilise tes styles .lb-*) -->
+  <div id="lb" class="lb-backdrop" aria-hidden="true">
+    <button class="lb-close" aria-label="Fermer">×</button>
+    <button class="lb-prev" aria-label="Précédent">‹</button>
+    <img class="lb-img" alt="">
+    <button class="lb-next" aria-label="Suivant">›</button>
+  </div>
+
+    <script>
+        function getParam(name){ const u=new URL(location.href); return u.searchParams.get(name); }
+        const slug = getParam('slug');
+        const titleEl = document.getElementById('title');
+        const pics = document.getElementById('pics');
+
+        function stripLeadingSlash(p){ return p && p.startsWith('/') ? p.slice(1) : p; }
+
+        // — Charge la liste des images de l’album —
+        (async function(){
+        if(!slug){ pics.innerHTML = '<article class="card">Album introuvable.</article>'; return; }
+        const here = new URL(location.href);
+        const dir  = here.origin + here.pathname.replace(/[^\/]+$/,'');
+        const candidates = [
+            `uploads/${encodeURIComponent(slug)}/index.json`,
+            `${dir}uploads/${encodeURIComponent(slug)}/index.json`,
+            `${here.origin}/uploads/${encodeURIComponent(slug)}/index.json`
+        ];
+        async function fetchFirstOK(urls){
+            for (const u of urls){ try{ const r=await fetch(u,{cache:'no-cache'}); if(r.ok) return await r.json(); }catch(e){} }
+            throw 0;
+        }
+        try{
+            const data = await fetchFirstOK(candidates);
+            titleEl.textContent = data.title || slug;
+            const imgs = data.images || [];
+            if(!imgs.length){ pics.innerHTML = '<article class="card">Pas encore d’images.</article>'; return; }
+            pics.innerHTML = imgs.map((img,i)=>`
+            <a href="${stripLeadingSlash(img.file)}" class="lb-link" data-index="${i}">
+                <img src="${stripLeadingSlash(img.thumb)}" alt="${data.title||slug} ${i+1}" loading="lazy">
+            </a>
+            `).join('');
+        }catch(e){
+            pics.innerHTML = '<article class="card">Impossible de lire l’album.</article>';
+        }
+        })();
+
+        // — Lightbox avec préchargement + blocage de la navigation —
+        (function(){
+        const lb   = document.getElementById('lb');
+        const img  = lb.querySelector('.lb-img');
+        const btnC = lb.querySelector('.lb-close');
+        const btnP = lb.querySelector('.lb-prev');
+        const btnN = lb.querySelector('.lb-next');
+
+        let links = [], index = 0;
+
+        function preload(src){
+            return new Promise((res,rej)=>{
+            const im = new Image();
+            im.onload = ()=>res(src);
+            im.onerror = rej;
+            im.src = src;
+            });
+        }
+
+        async function open(i){
+            links = Array.from(document.querySelectorAll('.lb-link'));
+            index = Math.max(0, Math.min(i, links.length-1));
+            const a    = links[index];
+            const full = a.getAttribute('href');          // fichier HD
+
+            document.body.classList.add('lb-open');
+            lb.classList.add('open','loading');
+            lb.setAttribute('aria-hidden','false');
+
+            try{
+            const readySrc = await preload(full);       // on attend que la HD soit chargée
+            img.src = readySrc;                         // on affiche d’un coup
+            }finally{
+            lb.classList.remove('loading');             // on cache le spinner
+            }
+        }
+
+        function hide(){
+            lb.classList.remove('open','loading');
+            lb.setAttribute('aria-hidden','true');
+            img.removeAttribute('src');
+            document.body.classList.remove('lb-open');
+        }
+
+        function go(d){ open(index + d); }
+
+        // Intercepter les clics avant tout autre handler (capture=true)
+        document.addEventListener('click', (e)=>{
+            const a = e.target.closest('.lb-link');
+            if(!a) return;
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            open(parseInt(a.dataset.index,10) || 0);
+        }, true);
+
+        btnC.addEventListener('click', hide);
+        btnP.addEventListener('click', ()=>go(-1));
+        btnN.addEventListener('click', ()=>go(1));
+
+        document.addEventListener('keydown', (e)=>{
+            if(!lb.classList.contains('open')) return;
+            if(e.key==='Escape') hide();
+            if(e.key==='ArrowLeft')  go(-1);
+            if(e.key==='ArrowRight') go(1);
+        });
+
+        lb.addEventListener('click', (e)=>{ if(e.target === lb) hide(); });
+        })();
+        </script>
+
+
+</body>
+</html>

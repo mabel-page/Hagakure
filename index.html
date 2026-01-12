@@ -1,0 +1,219 @@
+<!DOCTYPE html><html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Hagakure KC – Entrée</title>
+
+<link rel="icon" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/css/style.css"/>
+
+<!-- Accélère l'arrivée sur l'accueil -->
+<link rel="prefetch"  href="accueil.html">
+<link rel="prerender" href="accueil.html">
+<script type="speculationrules">
+{"prerender":[{"source":"list","urls":["accueil.html"]}]}
+</script>
+
+<style>
+/* === Écran d'intro / porte === */
+.intro{
+  position:fixed; inset:0; display:grid; place-items:center; z-index:60; overflow:hidden;
+  /* Durée de l'ouverture (lente) */
+  --intro-duration: 7s;
+
+  /* Réglages du "loquet" (point) */
+  --dot-size: clamp(64px, 9vw, 144px);
+  --dot-color: #e11d2e;
+  --dot-offset-y: 1px; /* ajuste si le point du logo n'est pas exactement centré verticalement */
+
+  /* Décor optionnel */
+  background: radial-gradient(1200px 600px at 50% 40%, #ffffff 0%, #f3f4f6 60%);
+}
+
+.intro__btn{background:none; border:none; cursor:pointer; padding:0; border-radius:50%; outline-offset:8px}
+.intro__logo{width:min(58vw, 360px); filter:drop-shadow(0 8px 16px rgba(0,0,0,.12))}
+
+.intro__half{
+  position:absolute; inset:0;
+  background-position:center; background-repeat:no-repeat; background-size:contain;
+  transition: transform var(--intro-duration) cubic-bezier(.2,.7,0,1), opacity .4s ease;
+  will-change:transform; pointer-events:none;
+}
+.intro__half.left{  clip-path:inset(0 50% 0 0); z-index:2 }
+.intro__half.right{ clip-path:inset(0 0 0 50%);  z-index:4 } /* ← au-dessus du trou blanc */
+
+ /* DEMI-CERCLE BLANC FORCÉ : élément indépendant qui suit la moitié gauche.
+    Z-index placé entre la moitié gauche (2) et la droite (4) pour qu’on ne voie
+    QUE la moitié gauche du disque. */
+.intro__hole{
+  position:absolute; z-index:3; pointer-events:none;
+  width:var(--dot-size); height:var(--dot-size); border-radius:50%;
+  left:50%; top:calc(50% + var(--dot-offset-y));
+  margin-left: calc(-.5 * var(--dot-size));
+  margin-top:  calc(-.5 * var(--dot-size));
+  background:#fff; /* ← blanc pur, garanti */
+  transition: transform var(--intro-duration) cubic-bezier(.2,.7,0,1);
+}
+
+ /* Le point rouge (loquet) qui part avec la moitié droite */
+.intro__dot{
+  position:absolute; z-index:5; pointer-events:none; /* au-dessus de tout */
+  width:var(--dot-size); height:var(--dot-size); border-radius:50%;
+  left:50%; top:calc(50% + var(--dot-offset-y));
+  margin-left: calc(-.5 * var(--dot-size));
+  margin-top:  calc(-.5 * var(--dot-size));
+  background: var(--dot-color);
+  transition: transform var(--intro-duration) cubic-bezier(.2,.7,0,1);
+}
+/* 1) Halo via pseudo-élément */
+.intro__dot{
+  position:absolute; z-index:4;  /* confirme le plan au-dessus des moitiés */
+  /* on garde tes autres propriétés (width/height/border-radius/background/transition…) */
+}
+/* Halo OFF par défaut */
+.intro__dot::after{
+  content:"";
+  position:absolute;
+  inset:-30px;                /* taille du halo autour du point */
+  border-radius:50%;
+  pointer-events:none;
+  /* gris doux, sans color-mix (compat garantie) */
+  background: radial-gradient(
+    closest-side,
+    rgba(17,18,19,0.42) 0%,
+    rgba(17,18,19,0.18) 55%,
+    rgba(17,18,19,0.00) 80%
+  );
+  opacity:0;
+  transform: scale(.92);
+  transition: opacity .28s ease-out, transform .38s ease-out;
+  will-change: opacity, transform;
+}
+
+/* ❶ Phase "halo" (avant ouverture) → ON */
+.intro.halo .intro__dot::after{
+  opacity:1;
+  transform: scale(1);
+}
+
+/* ❷ Quand l'ouverture démarre → halo s'efface vite */
+/* .intro.open .intro__dot::after{
+  opacity:0;
+  transition: opacity .18s ease-in;
+} */
+
+/* (facultatif) un léger drop-shadow gris en plus pendant l'ouverture */
+.intro.open .intro__dot{
+  filter: drop-shadow(0 0 18px rgba(17,18,19,.28))
+          drop-shadow(0 0 34px rgba(17,18,19,.12));
+}
+
+
+
+/* Voile léger (optionnel) */
+.intro__veil{
+  position:absolute; inset:0;
+  background: radial-gradient(600px 400px at 50% 40%, rgba(0,0,0,.05), rgba(0,0,0,.08));
+  pointer-events:none; transition:opacity .6s ease;
+}
+
+/* Ouverture */
+.intro.open .intro__half.left  { transform: translateX(-62vw) rotate(-1.5deg) }
+.intro.open .intro__hole       { transform: translateX(-62vw) rotate(-1.5deg) } /* ← le trou blanc suit la gauche */
+.intro.open .intro__half.right { transform: translateX( 62vw) rotate( 1.5deg) }
+.intro.open .intro__dot        { transform: translateX( 62vw) rotate( 1.5deg) }
+.intro.open .intro__veil       { opacity:0 }
+</style>
+</head>
+
+<body>
+<div id="intro" class="intro" aria-hidden="false" aria-label="Écran d'introduction">
+  <button id="introBtn" class="intro__btn" aria-label="Entrer sur le site">
+    <img id="introLogo" class="intro__logo" src="assets/img/logo.png" alt="Logo Hagakure KC" />
+  </button>
+
+  <div class="intro__half left" id="halfLeft" aria-hidden="true"></div>
+  <div class="intro__half right" id="halfRight" aria-hidden="true"></div>
+
+  <!-- Demi-cercle blanc forcé (seulement visible côté gauche) -->
+  <div class="intro__hole" aria-hidden="true"></div>
+
+  <!-- Loquet rouge indépendant -->
+  <div class="intro__dot" aria-hidden="true"></div>
+
+  <div class="intro__veil" aria-hidden="true"></div>
+</div>
+
+<script>
+const LOGO_URL = 'assets/img/logo.png';
+const intro = document.getElementById('intro');
+const introBtn = document.getElementById('introBtn');
+const halfLeft = document.getElementById('halfLeft');
+const halfRight = document.getElementById('halfRight');
+const introLogo = document.getElementById('introLogo');
+[halfLeft, halfRight].forEach(el => el.style.backgroundImage = `url("${LOGO_URL}")`);
+
+function prefersReduced(){ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+function getIntroDurationMs(){
+  const raw = getComputedStyle(intro).getPropertyValue('--intro-duration').trim();
+  if (raw.endsWith('ms')) return parseFloat(raw);
+  if (raw.endsWith('s'))  return parseFloat(raw) * 1000;
+  const n = parseFloat(raw); return Number.isFinite(n) ? n : 5000;
+}
+
+// Fallback universel : chauffe l'accueil dans un iframe caché
+let warm;
+document.addEventListener('DOMContentLoaded', () => {
+  try{
+    warm = document.createElement('iframe');
+    warm.src = 'accueil.html';
+    warm.setAttribute('aria-hidden','true');
+    warm.tabIndex = -1;
+    Object.assign(warm.style, {
+      position:'fixed', width:'0', height:'0', border:'0',
+      opacity:'0', visibility:'hidden', pointerEvents:'none'
+    });
+    document.body.appendChild(warm);
+  }catch(e){}
+});
+
+function go(){
+  if (prefersReduced()){ window.location.href = 'accueil.html'; return; }
+
+  // Cache le <img> pour ne pas voir la demi-pastille rouge résiduelle
+  introLogo.style.display = 'none';
+
+  // Lance l'ouverture
+  intro.classList.add('open');
+
+  const DUR   = getIntroDurationMs();          // 5000 ms avec la var CSS
+  const AHEAD = Math.max(200, DUR * 0.25);     // départ anticipé à 25% (comme demandé)
+
+  const navigateFast = () => {
+    if (navigateFast._done) return;
+    navigateFast._done = true;
+    if (warm && warm.parentNode) warm.parentNode.removeChild(warm);
+    window.location.href = 'accueil.html';
+  };
+
+  // 1) on part bien avant la fin → pas de temps mort
+  setTimeout(navigateFast, AHEAD);
+
+  // 2) si la transition finit avant le timer (peu probable), on part tout de suite
+  halfRight.addEventListener('transitionend', (e) => {
+    if (e.propertyName === 'transform') navigateFast();
+  }, { once:true });
+
+  // 3) sécurité absolue si aucun event ne remonte
+  setTimeout(navigateFast, DUR + 60);
+}
+
+intro.addEventListener('click', go);
+introBtn.addEventListener('keydown', (e)=>{
+  if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(); }
+});
+</script>
+
+
+</body>
+</html>
